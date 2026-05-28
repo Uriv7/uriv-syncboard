@@ -23,25 +23,16 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build and Push Backend Image
-      env:
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $ECR_REGISTRY/syncboard-backend:$IMAGE_TAG -t $ECR_REGISTRY/syncboard-backend:latest -f backend/Dockerfile.prod backend/
-        docker push $ECR_REGISTRY/syncboard-backend:$IMAGE_TAG
-        docker push $ECR_REGISTRY/syncboard-backend:latest
+        docker build -t ${{ secrets.ECR_REGISTRY }}/syncboard-backend:${{ github.sha }} -t ${{ secrets.ECR_REGISTRY }}/syncboard-backend:latest -f backend/Dockerfile.prod backend/
+        docker push ${{ secrets.ECR_REGISTRY }}/syncboard-backend:${{ github.sha }}
+        docker push ${{ secrets.ECR_REGISTRY }}/syncboard-backend:latest
 
     - name: Build and Push Frontend Image
-      env:
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        CORS_RAW: ${{ secrets.CORS_ORIGINS }}
-        IMAGE_TAG: ${{ github.sha }}
       run: |
-        CLEAN_IP=$(echo "$CORS_RAW" | sed 's|http://||' | sed 's|https://||')
-        
         docker build \
-          --build-arg VITE_API_URL=$CORS_RAW:8000 \
-          --build-arg VITE_WS_URL=ws://$CLEAN_IP:8000 \
-          -t $ECR_REGISTRY/syncboard-frontend:$IMAGE_TAG -t $ECR_REGISTRY/syncboard-frontend:latest -f frontend/Dockerfile.prod frontend/
-        docker push $ECR_REGISTRY/syncboard-frontend:$IMAGE_TAG
-        docker push $ECR_REGISTRY/syncboard-frontend:latest
+          --build-arg VITE_API_URL=${{ secrets.CORS_ORIGINS }}:8000 \
+          --build-arg VITE_WS_URL=ws://100.53.237.46:8000 \
+          -t ${{ secrets.ECR_REGISTRY }}/syncboard-frontend:${{ github.sha }} -t ${{ secrets.ECR_REGISTRY }}/syncboard-frontend:latest -f frontend/Dockerfile.prod frontend/
+        docker push ${{ secrets.ECR_REGISTRY }}/syncboard-frontend:${{ github.sha }}
+        docker push ${{ secrets.ECR_REGISTRY }}/syncboard-frontend:latest
