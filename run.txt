@@ -1,0 +1,68 @@
+satendergupta@Satenders-MacBook-Air uriv-syncboard % python3 -m venv venv      
+satendergupta@Satenders-MacBook-Air uriv-syncboard % source venv/bin/activate  
+(venv) satendergupta@Satenders-MacBook-Air uriv-syncboard % docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+(venv) satendergupta@Satenders-MacBook-Air uriv-syncboard % chmod +x start_macos.sh
+./start_macos.sh
+
+╔═══════════════════════════════════════╗
+║   SyncBoard  •  macOS Startup          ║
+╚═══════════════════════════════════════╝
+
+
+── Checking prerequisites ──
+▶ Python 3.14 found.
+▶ Tesseract found: tesseract 5.5.2
+▶ Node v25.8.2 found.
+
+── Starting PostgreSQL (Docker) ──
+WARN[0000] /Volumes/Uriv/uriv-syncboard/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+▶ Waiting for PostgreSQL to be ready…
+▶ PostgreSQL is ready.
+
+── Setting up Python virtual environment ──
+▶ Creating virtual environment…
+▶ Virtual environment activated.
+▶ Installing Python dependencies (first run may take ~60s)…
+▶ Python dependencies ready.
+
+── Writing backend .env ──
+▶ Created backend/.env
+
+── Starting FastAPI backend (local — webcam access enabled) ──
+▶ Backend PID 55172 — waiting for startup…
+▶ Backend is up: http://localhost:8000
+
+── Setting up frontend ──
+▶ Installing npm packages (first run may take ~30s)…
+
+added 217 packages, and audited 218 packages in 17s
+
+91 packages are looking for funding
+  run `npm fund` for details
+
+2 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+▶ Starting Vite dev server…
+▶ Frontend is up: http://localhost:5173
+
+╔══════════════════════════════════════════════╗
+║  🎉  SyncBoard is running!                   ║
+║                                              ║
+║  Open in browser:                           ║
+║    http://localhost:5173                     ║
+║                                              ║
+║  Backend API docs:                          ║
+║    http://localhost:8000/docs                ║
+║                                              ║
+║  Logs:                                      ║
+║    tail -f /tmp/syncboard_backend.log        ║
+║    tail -f /tmp/syncboard_frontend.log       ║
+║                                              ║
+║  Press Ctrl+C to stop all services          ║
+╚══════════════════════════════════════════════╝
+

@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: syncboard_db
+    restart: always
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:       ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: ${ECR_REGISTRY}/syncboard-backend:${IMAGE_TAG:-latest}
+    container_name: syncboard_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL:     postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      CORS_ORIGINS:     ${CORS_ORIGINS}
+      OCR_ENGINE:       tesseract
+      MIN_CONFIDENCE:   "30"
+      CLEAR_THRESHOLD:  "0.05"
+      AWS_REGION:       ${AWS_REGION}
+      S3_BUCKET:        ${S3_BUCKET}
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
