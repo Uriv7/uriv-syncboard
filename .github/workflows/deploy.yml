@@ -36,9 +36,11 @@ jobs:
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
+        CLEAN_IP=$(echo "${{ secrets.CORS_ORIGINS }}" | sed 's|http://||')
+        
         docker build \
           --build-arg VITE_API_URL=${{ secrets.CORS_ORIGINS }}:8000 \
-          --build-arg VITE_WS_URL=ws://${{ secrets.CORS_ORIGINS | sed 's|http://||' }}:8000 \
+          --build-arg VITE_WS_URL=ws://$CLEAN_IP:8000 \
           -t $ECR_REGISTRY/syncboard-frontend:$IMAGE_TAG -t $ECR_REGISTRY/syncboard-frontend:latest -f frontend/Dockerfile.prod frontend/
         docker push $ECR_REGISTRY/syncboard-frontend:$IMAGE_TAG
         docker push $ECR_REGISTRY/syncboard-frontend:latest
