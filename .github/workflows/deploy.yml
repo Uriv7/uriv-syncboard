@@ -1,0 +1,44 @@
+name: Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and Push Backend Image
+      env:
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/syncboard-backend:$IMAGE_TAG -t $ECR_REGISTRY/syncboard-backend:latest -f backend/Dockerfile.prod backend/
+        docker push $ECR_REGISTRY/syncboard-backend:$IMAGE_TAG
+        docker push $ECR_REGISTRY/syncboard-backend:latest
+
+    - name: Build and Push Frontend Image
+      env:
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build \
+          --build-arg VITE_API_URL=http://${{ secrets.CORS_ORIGINS }}:8000 \
+          --build-arg VITE_WS_URL=ws://${{ secrets.CORS_ORIGINS }}:8000 \
+          -t $ECR_REGISTRY/syncboard-frontend:$IMAGE_TAG -t $ECR_REGISTRY/syncboard-frontend:latest -f frontend/Dockerfile.prod frontend/
+        docker push $ECR_REGISTRY/syncboard-frontend:$IMAGE_TAG
+        docker push $ECR_REGISTRY/syncboard-frontend:latest
